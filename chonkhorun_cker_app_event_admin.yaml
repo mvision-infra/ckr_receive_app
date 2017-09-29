@@ -1,0 +1,33 @@
+---
+
+- hosts: chongkhorun_app
+  become: true
+  gather_facts: yes
+  vars:
+   ansible_python_interpreter: "/usr/bin/env python"
+
+
+  tasks:
+      - name: make directory
+        file:
+          path: /usr/local/etc/log
+          state: directory
+          mode: 0755
+      - name: create directory
+        file:
+          path: /home/root/go/src/event_admin
+          state: directory
+          mode: 0755
+
+      - name: deploy file backend project
+        unarchive:
+        # src: /Users/ZaiEf/go/src/event_admin/event_admin.tar
+         src: /Users/worawich/Documents/Chongkhorun_app/src/event_admin.tar
+         dest: /home/root/go/src/event_admin/.
+
+      - name: restart supervisor
+        supervisorctl:
+         name: event_admin
+         state: restarted
+
+...

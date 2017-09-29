@@ -1,0 +1,118 @@
+---
+
+- hosts: chongkhorun_app
+  become: true
+  gather_facts: yes
+  vars:
+   ansible_python_interpreter: "/usr/bin/env python"
+#   mongodb_version: "3.4"
+#   mongodb_storage_engine: "{{ 'mmapv1' if mongodb_version[0:3] == '3.0' else 'wiredTiger' }}"
+  tasks:
+
+    - name: Create a new database with name 'ckr_app_receive'
+      mysql_db:
+        name: ckr_app_receive
+        state: present
+    - name: Create User for mysql
+      mysql_user:
+        name: eventadmin
+        password: adminmvision
+        priv: '*.*:ALL'
+        state: present
+
+  roles:
+  #  - role: jdauphant.nginx
+  #    nginx_http_params:
+  #      - sendfile "on"
+  #      - access_log "/var/log/nginx/access.log"
+  #    nginx_sites:
+  #      default:
+  #        - listen 80
+  #        - server_name frontend
+  #        - location / { root /usr/local/etc/tnt/dist_frontend; index index.html index.htm; try_files $uri$args $uri$args/ $uri $uri/ /index.html; }
+
+       #admin_ui:
+       # - listen 8083
+       # - server_name admin_ui
+        #- location / { root /usr/local/etc/tnt/admin_ui; index index.html index.htm; try_files $uri$args $uri$args/ $uri $uri/ /index.html; }
+
+   - role: ansible-supervisor
+     supervisor_programs_present:
+
+       ckr_app_receive:
+         command: /home/root/go/src/ckr_app_receive/ckr_app_receive.linux
+         directory: /home/root/go/src/ckr_app_receive
+         autostart: true
+         autorestart: true
+         stdout_logfile: /usr/local/etc/log/ckr_stdout.log
+         stdout_logfile_maxbytes: 50MB
+         stderr_logfile: /usr/local/etc/log/ckr_stderr.log
+         stderr_logfile_maxbytes: 50MB
+         user: root
+
+       event_admin:
+         command: /home/root/go/src/event_admin/event_admin.linux
+         directory: /home/root/go/src/event_admin
+         autostart: true
+         autorestart: true
+         stdout_logfile: /usr/local/etc/log/admin_stdout.log
+         stdout_logfile_maxbytes: 50MB
+         stderr_logfile: /usr/local/etc/log/admin_stderr.log
+         stderr_logfile_maxbytes: 50MB
+         user: root
+         
+      #  payment:
+      #    command: nodejs /usr/local/etc/tnt/dist_payment/http.js
+      #    directory: /usr/local/etc/tnt/dist_payment
+      #    autostart: true
+      #    autorestart: true
+      #    stdout_logfile: /usr/local/etc/tnt/log/payment_stdout.log
+      #    stdout_logfile_maxbytes: 50MB
+      #    stderr_logfile: /usr/local/etc/tnt/log/payment_stderr.log
+      #    stderr_logfile_maxbytes: 50MB
+      #    user: root
+
+
+
+       # fireleaves:
+       #   command: nodejs /usr/local/etc/tnt/fireleaves/app.js
+       #   directory: /usr/local/etc/tnt/fireleaves
+       #   autostart: true
+       #   autorestart: true
+       #   stdout_logfile: /usr/local/etc/tnt/log/fireleaves_stdout.log
+       #   stdout_logfile_maxbytes: 50MB
+       #   stderr_logfile: /usr/local/etc/tnt/log/fireleaves_stderr.log
+       #   stderr_logfile_maxbytes: 50MB
+       #   user: root
+
+       # # admin_sails:
+       #   command: nodejs /usr/local/etc/tnt/admin/app.js
+       #   directory: /usr/local/etc/tnt/admin
+       #   autostart: true
+       #   autorestart: true
+       #   stdout_logfile: /usr/local/etc/tnt/log/admin_stdout.log
+       #   stdout_logfile_maxbytes: 50MB
+       #   stderr_logfile: /usr/local/etc/tnt/log/admin_stderr.log
+       #   stderr_logfile_maxbytes: 50MB
+       #   user: root
+
+      #  email_sender:
+      #    command: nodejs /usr/local/etc/tnt/dist_email/main.js
+      #    directory: /usr/local/etc/tnt/dist_email
+      #    autostart: true
+      #    autorestart: true
+      #    stdout_logfile: /usr/local/etc/tnt/log/email_stdout.log
+      #    stdout_logfile_maxbytes: 50MB
+      #    stderr_logfile: /usr/local/etc/tnt/log/email_stderr.log
+      #    stderr_logfile_maxbytes: 50MB
+      #    user: root
+
+
+
+
+
+   #- role: greendayonfire.mongodb
+
+    # - role: nodesource.node
+
+...
